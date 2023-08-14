@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Image Text</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter&family=Righteous&display=swap" rel="stylesheet">
+
+	<link rel="shortcut icon" type="image/x-icon" href="/assets/images/marker.png" />
+	<style type="text/css">
+		body{
+			font-family: 'Inter', sans-serif;
+			background: #fff;
+
+		}
+		.fontStyle {
+			font-family: 'Righteous', cursive;
+		}
+		#map{
+			height: 400px;
+			width: 100%;
+		}
+		.loading img{
+			opacity: .1;
+			filter: grayscale(1);
+		}
+		.loader {
+			display: none;
+		}
+		.loading .loader {
+		  display: block;
+		  z-index: 1;
+		}
+		.neo{
+			border-radius: 30px;
+			background: #e0e0e0;
+			box-shadow:  25px 25px 50px #bebebe,
+			             -25px -25px 50px #ffffff;
+		}
+		.pl {width: 6em; height: 6em; } .pl__ring {animation: ringA 2s linear infinite; } .pl__ring--a {stroke: #f42f25; } .pl__ring--b {animation-name: ringB; stroke: #f49725; } .pl__ring--c {animation-name: ringC; stroke: #255ff4; } .pl__ring--d {animation-name: ringD; stroke: #f42582; } /* Animations */ @keyframes ringA {from, 4% {stroke-dasharray: 0 660; stroke-width: 20; stroke-dashoffset: -330; } 12% {stroke-dasharray: 60 600; stroke-width: 30; stroke-dashoffset: -335; } 32% {stroke-dasharray: 60 600; stroke-width: 30; stroke-dashoffset: -595; } 40%, 54% {stroke-dasharray: 0 660; stroke-width: 20; stroke-dashoffset: -660; } 62% {stroke-dasharray: 60 600; stroke-width: 30; stroke-dashoffset: -665; } 82% {stroke-dasharray: 60 600; stroke-width: 30; stroke-dashoffset: -925; } 90%, to {stroke-dasharray: 0 660; stroke-width: 20; stroke-dashoffset: -990; } } @keyframes ringB {from, 12% {stroke-dasharray: 0 220; stroke-width: 20; stroke-dashoffset: -110; } 20% {stroke-dasharray: 20 200; stroke-width: 30; stroke-dashoffset: -115; } 40% {stroke-dasharray: 20 200; stroke-width: 30; stroke-dashoffset: -195; } 48%, 62% {stroke-dasharray: 0 220; stroke-width: 20; stroke-dashoffset: -220; } 70% {stroke-dasharray: 20 200; stroke-width: 30; stroke-dashoffset: -225; } 90% {stroke-dasharray: 20 200; stroke-width: 30; stroke-dashoffset: -305; } 98%, to {stroke-dasharray: 0 220; stroke-width: 20; stroke-dashoffset: -330; } } @keyframes ringC {from {stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: 0; } 8% {stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -5; } 28% {stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -175; } 36%, 58% {stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: -220; } 66% {stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -225; } 86% {stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -395; } 94%, to {stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: -440; } } @keyframes ringD {from, 8% {stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: 0; } 16% {stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -5; } 36% {stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -175; } 44%, 50% {stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: -220; } 58% {stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -225; } 78% {stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -395; } 86%, to {stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: -440; } }
+
+		@media (min-width:1200px){
+			.w-md-50{
+				width: 50% !important
+			}
+		}
+		.rounded-3 {
+			border-radius: 30px !important;
+		}
+		footer{
+			font-size: 10px;
+		}
+		footer a {
+			text-decoration: unset;
+			color: #999;
+		}
+	</style>
+</head>
+<body>
+	<div class="w-100 w-md-50 container h-100 ">
+		<div class="text-center mt-5 mb-3">
+			<h3 class="fontStyle mb-0 p-0">ImageGeoTag</h3>
+			<p>Watermarking photos using geo-tagging</p>
+		</div>
+	<div class="d-flex align-items-center justify-content-center flex-wrap flex-column p-5  neo rounded-5">
+		<div class="row">
+			<div class="col-md-12 mb-3">
+				<form>
+					<input type="file" class="form-control" accept="image/*" capture="user" name="image">
+				</form>
+			</div>
+			<div class="col-md-6 text-center mb-3 mb-md-0">
+				<label class="label text-muted mb-2">Source</label>
+				<div class="neo p-3">
+					<a href="#" class="image-ori" target="_BLANK" download="ori.jpg">
+						<img src="/assets/images/icon.png" class="w-100 rounded-3 ">
+					</a>
+				</div>
+			</div>
+			<div class="col-md-6 text-center">
+				<label class="label text-muted mb-2">Result</label>
+				<div class="neo p-3">
+					<a href="#" class="image-edit position-relative" target="_BLANK" download="preview.jpg">
+					  <section class="loader" style="position:absolute;right: 50%;bottom: 50%;transform: translate(50%,50%);padding: 10px;border-radius: 30px;">
+					    <svg class="pl" width="240" height="240" viewBox="0 0 240 240">
+							<circle class="pl__ring pl__ring--a" cx="120" cy="120" r="105" fill="none" stroke="#000" stroke-width="20" stroke-dasharray="0 660" stroke-dashoffset="-330" stroke-linecap="round"></circle>
+							<circle class="pl__ring pl__ring--b" cx="120" cy="120" r="35" fill="none" stroke="#000" stroke-width="20" stroke-dasharray="0 220" stroke-dashoffset="-110" stroke-linecap="round"></circle>
+							<circle class="pl__ring pl__ring--c" cx="85" cy="120" r="70" fill="none" stroke="#000" stroke-width="20" stroke-dasharray="0 440" stroke-linecap="round"></circle>
+							<circle class="pl__ring pl__ring--d" cx="155" cy="120" r="70" fill="none" stroke="#000" stroke-width="20" stroke-dasharray="0 440" stroke-linecap="round"></circle>
+						</svg>
+					  </section>
+						<img src="/assets/images/icon.png" class="w-100 rounded-3 ">
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<canvas id="canvas" class="d-none"></canvas>
+	<footer class="mt-4 text-muted text-center">Created by <a href="https://linkedin.com/in/as-shiddiq">as-shiddiq</a></footer>
+	</div>
+</body>
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal-map" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="map"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript">
+	//END MAP
+
+	let elModalMap = document.querySelector('#modal-map');
+	var modalMap = new bootstrap.Modal(elModalMap, {
+	  keyboard: false
+	});
+
+	let map;
+	let marker;
+	let lant= -3.843426;
+	let lng = 114.9422364;
+
+	elModalMap.addEventListener('shown.bs.modal',()=>{
+		if(map==undefined)
+		{
+			map = L.map('map').setView([lat, lng], 13);
+			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 19,
+				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+			}).addTo(map);
+		}
+
+		if(marker==undefined)
+		{
+			marker = L.marker([lat, lng], {icon: L.icon({
+				    iconUrl: '/assets/images/marker.png',
+				    iconSize:     [50, 50], 
+				})}).addTo(map);
+		}
+		var latLngs = [ marker.getLatLng() ];
+		var markerBounds = L.latLngBounds(latLngs);
+		map.fitBounds(markerBounds);
+	});
+	//END MAP
+
+	let elFile = document.querySelector('[name=image]');
+	let elImageOri = document.querySelector('.image-ori');
+	let elImageEdit = document.querySelector('.image-edit');
+
+
+	
+	let convertDMSToDD = (degrees, minutes, seconds, direction) => {
+        var dd = degrees + (minutes/60) + (seconds/360000);
+        if (direction == "S" || direction == "W") {
+            dd = dd * -1;
+        }
+        return dd;
+    }
+
+
+    let addTextonImage = (img,t) => {
+    	let elImage = document.createElement('img');
+    	let objectUrl = URL.createObjectURL(img);
+    	elImage.src = objectUrl;
+    	elImage.onload = function() {
+		    let canvas = document.getElementById("canvas");
+		    let ctx = canvas.getContext("2d");
+		    
+		    canvas.width = parseInt(elImage.naturalWidth);
+		    canvas.height = parseInt(elImage.naturalHeight);
+
+		    let h = parseInt(canvas.height);
+		    let w = parseInt(canvas.width);
+		    let f = parseInt(canvas.height)/50;
+        ctx.drawImage(elImage,  0, 0, elImage.naturalWidth, elImage.naturalHeight);
+
+        ctx.lineWidth = 1;
+        ctx.fillStyle = "#fff";
+        ctx.lineStyle = "#ffff00";
+        ctx.font = `${f}px Inter`;
+
+        const x = 50;
+				const y = 50;
+				const lines = t.split('\n');
+				for (let i = 0; i < lines.length; i++) {
+				  ctx.fillText(lines[i], x, h - y - (i * f));
+				}
+
+        let imageEditUrl = canvas.toDataURL("image/jpeg", 0.2);
+				elImageEdit.querySelector('img').src = imageEditUrl;
+				elImageEdit.classList.remove('loading');
+				elImageEdit.href = imageEditUrl;
+    	}
+    }
+
+	
+	let getExif = (img) => {
+    EXIF.getData(img, async function() {
+      let meta = EXIF.getAllTags(this);
+      let latMeta = meta.GPSLatitude;
+      let lngMeta = meta.GPSLongitude;
+      if(latMeta!=undefined && lngMeta!=undefined)
+      {
+	      lat = convertDMSToDD(latMeta[0].numerator,latMeta[1].numerator,latMeta[2].numerator,meta.GPSLatitudeRef);
+	      lng = convertDMSToDD(lngMeta[0].numerator,lngMeta[1].numerator,lngMeta[2].numerator,meta.GPSLongitudeRef);
+				// modalMap.show();
+				t = meta.DateTime;
+				t += `\n${latMeta[0].numerator}°${latMeta[1].numerator}'${latMeta[2].numerator}" ${meta.GPSLatitudeRef}, ${lngMeta[0].numerator}°${lngMeta[1].numerator}'${lngMeta[2].numerator}" ${meta.GPSLongitudeRef},`;
+				//get location name
+				let get = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+				let resp = await get.json();
+				let adr = resp.address;
+				t += `\n${adr.county}, ${adr.state}`;
+				t += `\n${adr.road}, ${adr.city_block}`;
+				addTextonImage(img,t);
+      }
+      else
+      {
+      	Swal.fire({
+      		icon:'error',
+      		title:'Error!',
+      		html:'make sure the photo has coordinates '
+      	});
+				elImageEdit.classList.remove('loading');
+      }
+    });
+	}
+
+
+	elFile.addEventListener('change',(e)=>{
+		let file = e.target.files[0];
+		if(file)
+		{
+			let fileReader = new FileReader();
+			fileReader.readAsDataURL(file);
+			fileReader.addEventListener('load',(e)=>{
+				let res = e.target.result;
+				elImageOri.querySelector('img').src = res;
+				elImageOri.href = res;
+				elImageEdit.querySelector('img').src = res;
+				elImageEdit.classList.add('loading');
+				elImageEdit.href = res;
+				getExif(file);
+			});
+
+		}
+	})
+</script>
+</html>
