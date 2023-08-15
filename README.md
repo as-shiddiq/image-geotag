@@ -1,6 +1,6 @@
 # ImageGeoTag
-
-<a href="https://as-shiddiq.github.io/image-geotag/index.html"><strong>Demo Page</strong></a>
+<img src="/assets/images/ss.png" alt="Screenshot"/>
+<a href="https://as-shiddiq.github.io/image-geotag/index.html" target="_BLANK"><strong>Demo Page</strong></a>
 
 References :
 
