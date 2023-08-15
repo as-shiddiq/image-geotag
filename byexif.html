@@ -130,35 +130,9 @@
 <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
 <script type="text/javascript">
+	//END MAP
 
-
-	let getReverseGeocoding = async (lat,lng) => {
-			let get = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
-			let resp = await get.json();
-			return resp;
-	}
-	//get location API
-	let getLocation = (img) => {
-	  if (navigator.geolocation) {
-	    navigator.geolocation.getCurrentPosition(async (pos)=>{
-	    	lat = pos.coords.latitude;
-	    	lng = pos.coords.longitude;
-	    	let t = `${moment().format('D MM YYYY, hh:mm:ss')}`;
-	    	t += `\n${convertDDToDMS(lat,false)},${convertDDToDMS(lng,true)}`;
-	    	let resp = await getReverseGeocoding(lat,lng);
-				let adr = resp.address;
-				t += `\n${adr.county}, ${adr.state}`;
-				t += `\n${adr.road}, ${adr.city_block}`;
-				addTextonImage(img,t);
-	    });
-	  } else {
-	    x.innerHTML = "Geolocation is not supported by this browser.";
-	  }
-	}
-
-	//START MAP
 	let elModalMap = document.querySelector('#modal-map');
 	var modalMap = new bootstrap.Modal(elModalMap, {
 	  keyboard: false
@@ -196,56 +170,85 @@
 	let elImageOri = document.querySelector('.image-ori');
 	let elImageEdit = document.querySelector('.image-edit');
 
-	function convertDDToDMS(dd,isLng=false) {
-		var dir = dd < 0
-	    ? isLng ? 'W' : 'S'
-	    : isLng ? 'E' : 'N';
 
-	  var absDd = Math.abs(dd);
-	  var deg = absDd | 0;
-	  var frac = absDd - deg;
-	  var min = (frac * 60) | 0;
-	  var sec = frac * 3600 - min * 60;
-	  // Round it to 2 decimal points.
-	  sec = Math.round(sec * 100) / 100;
-	  return deg + "°" + min + "'" + sec + '"' + dir;
+	
+	let convertDMSToDD = (degrees, minutes, seconds, direction) => {
+        var dd = degrees + (minutes/60) + (seconds/360000);
+        if (direction == "S" || direction == "W") {
+            dd = dd * -1;
+        }
+        return dd;
+    }
+
+
+    let addTextonImage = (img,t) => {
+    	let elImage = document.createElement('img');
+    	let objectUrl = URL.createObjectURL(img);
+    	elImage.src = objectUrl;
+    	elImage.onload = function() {
+		    let canvas = document.getElementById("canvas");
+		    let ctx = canvas.getContext("2d");
+		    
+		    canvas.width = parseInt(elImage.naturalWidth);
+		    canvas.height = parseInt(elImage.naturalHeight);
+
+		    let h = parseInt(canvas.height);
+		    let w = parseInt(canvas.width);
+		    let f = parseInt(canvas.height)/50;
+        ctx.drawImage(elImage,  0, 0, elImage.naturalWidth, elImage.naturalHeight);
+
+        ctx.lineWidth = 1;
+        ctx.fillStyle = "#fff";
+        ctx.lineStyle = "#ffff00";
+        ctx.font = `${f}px Inter`;
+
+        const x = 50;
+				const y = 50;
+				const lines = t.split('\n');
+				for (let i = 0; i < lines.length; i++) {
+				  ctx.fillText(lines[i], x, h - y - (i * f));
+				}
+
+        let imageEditUrl = canvas.toDataURL("image/jpeg", 0.2);
+				elImageEdit.querySelector('img').src = imageEditUrl;
+				elImageEdit.classList.remove('loading');
+				elImageEdit.href = imageEditUrl;
+    	}
+    }
+
+	
+	let getExif = (img) => {
+    EXIF.getData(img, async function() {
+      let meta = EXIF.getAllTags(this);
+      let latMeta = meta.GPSLatitude;
+      let lngMeta = meta.GPSLongitude;
+      if(latMeta!=undefined && lngMeta!=undefined)
+      {
+	      lat = convertDMSToDD(latMeta[0].numerator,latMeta[1].numerator,latMeta[2].numerator,meta.GPSLatitudeRef);
+	      lng = convertDMSToDD(lngMeta[0].numerator,lngMeta[1].numerator,lngMeta[2].numerator,meta.GPSLongitudeRef);
+				// modalMap.show();
+				t = meta.DateTime;
+				t += `\n${latMeta[0].numerator}°${latMeta[1].numerator}'${latMeta[2].numerator}" ${meta.GPSLatitudeRef}, ${lngMeta[0].numerator}°${lngMeta[1].numerator}'${lngMeta[2].numerator}" ${meta.GPSLongitudeRef},`;
+				//get location name
+				let get = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+				let resp = await get.json();
+				let adr = resp.address;
+				t += `\n${adr.county}, ${adr.state}`;
+				t += `\n${adr.road}, ${adr.city_block}`;
+				addTextonImage(img,t);
+      }
+      else
+      {
+      	Swal.fire({
+      		icon:'error',
+      		title:'Error!',
+      		html:'make sure the photo has coordinates '
+      	});
+				elImageEdit.classList.remove('loading');
+      }
+    });
 	}
 
- 	//add geo tag to image
-  let addTextonImage = (img,t) => {
-  	let elImage = document.createElement('img');
-  	let objectUrl = URL.createObjectURL(img);
-  	elImage.src = objectUrl;
-  	elImage.onload = function() {
-	    let canvas = document.getElementById("canvas");
-	    let ctx = canvas.getContext("2d");
-	    
-	    canvas.width = parseInt(elImage.naturalWidth);
-	    canvas.height = parseInt(elImage.naturalHeight);
-
-	    let h = parseInt(canvas.height);
-	    let w = parseInt(canvas.width);
-	    let f = parseInt(canvas.height)/50;
-      ctx.drawImage(elImage,  0, 0, elImage.naturalWidth, elImage.naturalHeight);
-
-      ctx.lineWidth = 1;
-      ctx.fillStyle = "#fff";
-      ctx.lineStyle = "#ffff00";
-      ctx.font = `${f}px Inter`;
-
-      const x = f;
-			const y = f;
-			const lines = t.split('\n');
-			for (let i = 0; i < lines.length; i++) {
-			  ctx.fillText(lines[i], x, h - y - (i * f));
-			}
-
-      let imageEditUrl = canvas.toDataURL("image/jpeg", 0.2);
-			elImageEdit.querySelector('img').src = imageEditUrl;
-			elImageEdit.classList.remove('loading');
-			elImageEdit.href = imageEditUrl;
-  	}
-  }
 
 	elFile.addEventListener('change',(e)=>{
 		let file = e.target.files[0];
@@ -260,7 +263,7 @@
 				elImageEdit.querySelector('img').src = res;
 				elImageEdit.classList.add('loading');
 				elImageEdit.href = res;
-				getLocation(file);
+				getExif(file);
 			});
 
 		}
