@@ -1,3 +1,7 @@
+# ImageGeoTag
+
+<a href="https://as-shiddiq.github.io/image-geotag/index.html"><strong>Demo Page</strong></a>
+
 References :
 
 - https://dev.to/michaelburrows/preview-selected-image-in-a-input-type-file-using-javascript-k5j
