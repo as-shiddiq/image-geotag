@@ -3,9 +3,11 @@ Watermarking photos using geo-tagging
 
 ![Screenshot](https://github.com/as-shiddiq/image-geotag/raw/main/assets/images/ss.png)
 
-[Demo Page](https://as-shiddiq.github.io/image-geotag/index.html)
+[**Demo Page**](https://as-shiddiq.github.io/image-geotag/index.html)
+
 Alternative demo get geolocation by EXIF image
-[Demo by EXIF](https://as-shiddiq.github.io/image-geotag/byexif.html)
+
+[**Demo by EXIF**](https://as-shiddiq.github.io/image-geotag/byexif.html)
 
 References :
 - https://dev.to/michaelburrows/preview-selected-image-in-a-input-type-file-using-javascript-k5j
