@@ -1,9 +1,13 @@
 # ImageGeoTag
-<img src="/assets/images/ss.png" alt="Screenshot"/>
-<a href="https://as-shiddiq.github.io/image-geotag/index.html" target="_BLANK"><strong>Demo Page</strong></a>
+Watermarking photos using geo-tagging
+
+![Screenshot](https://github.com/as-shiddiq/image-geotag/raw/main/assets/images/ss.png)
+
+[Demo Page](https://as-shiddiq.github.io/image-geotag/index.html)
+Alternative demo get geolocation by EXIF image
+[Demo by EXIF](https://as-shiddiq.github.io/image-geotag/byexif.html)
 
 References :
-
 - https://dev.to/michaelburrows/preview-selected-image-in-a-input-type-file-using-javascript-k5j
 - https://github.com/exif-js/exif-js
 - https://bobbyhadz.com/blog/check-image-width-and-height-before-upload-using-javascript
